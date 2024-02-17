@@ -3,23 +3,67 @@
 
 #include <cmath>
 #include <algorithm>
-
+using namespace std;
 namespace CGL {
 
   Color Texture::sample(const SampleParams& sp) {
     // TODO: Task 6: Fill this in.
+      
+      if(sp.lsm == L_ZERO) {
+          float level = 0;
+          if(sp.psm == P_NEAREST) {
+              return sample_nearest(sp.p_uv, level);
+          }
+          else if(sp.psm == P_LINEAR) {
+              return sample_bilinear(sp.p_uv, level);
+          }
+      }
+      if(sp.lsm == L_NEAREST) {
+          float level = get_level(sp);
+          int nearestLevel = static_cast<int>(round(level));
+          nearestLevel = min(nearestLevel, 8); // 避免超出最大级别
+          if(sp.psm == P_NEAREST) {
+              return sample_nearest(sp.p_uv, nearestLevel);
+          }
+          else if (sp.psm == P_LINEAR) {
+              return sample_bilinear(sp.p_uv, nearestLevel);
+          }
+      }
+      else if(sp.lsm == L_LINEAR) {
+          float level = get_level(sp);
+          int levelLow = static_cast<int>(floor(level));
+          int levelHigh = static_cast<int>(floor(level + 1));
+          levelLow = min(levelLow, 8);
+          levelHigh = min(levelHigh, 8);
 
+          Color colorLow = sample_bilinear(sp.p_uv, levelLow);
+          Color colorHigh = sample_bilinear(sp.p_uv, levelHigh);
+          float alpha = level - levelLow;
+          return colorLow * (1 - alpha) + colorHigh * alpha; // 两个级别之间进行线性插值
+      }
 
-// return magenta for invalid level
-    return Color(1, 0, 1);
+      // return magenta for invalid level
+      return Color(0, 1, 1);
   }
 
   float Texture::get_level(const SampleParams& sp) {
     // TODO: Task 6: Fill this in.
+    Vector2D ddx = sp.p_dx_uv; // dx的导数
+    Vector2D ddy = sp.p_dy_uv; // dy的导数
 
+    // 根据屏幕空间导数的最大长度来决定MipMap的级别
+    float L = max(sqrt(ddx.x * ddx.x + ddx.y * ddx.y) * width, sqrt(ddy.x * ddy.x + ddy.y * ddy.y) * height);
 
+    if (L <= 1.0f) return 0; // 如果L小于或等于1，则不需要使用MipMap
 
-    return 0;
+    float level = log2(L);
+
+    if (level < 0) {
+        return 0;
+    }
+
+    // 确保MipMap级别不超过最大值
+    return level;
   }
 
   Color MipLevel::get_texel(int tx, int ty) {
@@ -30,22 +74,36 @@ namespace CGL {
     // TODO: Task 5: Fill this in.
     auto& mip = mipmap[level];
 
+    int x = min(static_cast<int>(uv.x * mip.width), static_cast<int>(mip.width - 1));
+    int y = min(static_cast<int>(uv.y * mip.height), static_cast<int>(mip.height - 1));
+
+    return mip.get_texel(x, y); 
 
 
 
     // return magenta for invalid level
-    return Color(1, 0, 1);
+    /*return Color(1, 0, 1);*/
   }
 
   Color Texture::sample_bilinear(Vector2D uv, int level) {
     // TODO: Task 5: Fill this in.
     auto& mip = mipmap[level];
+    float x = uv.x * mip.width;
+    float y = uv.y * mip.height;
 
+    int x0 = floor(x);
+    int y0 = floor(y);
 
+    int x1 = min(x0 + 1, static_cast<int>(mip.width - 1));
+    int y1 = min(y0 + 1, static_cast<int>(mip.height - 1));
 
+    float dx = x - x0;
+    float dy = y - y0;
 
-    // return magenta for invalid level
-    return Color(1, 0, 1);
+    Color top = mip.get_texel(x0, y0) * (1 - dx) + mip.get_texel(x1, y0) * dx;
+    Color bottom = mip.get_texel(x0, y1) * (1 - dx) + mip.get_texel(x1, y1) * dx;
+
+    return top * (1 - dy) + bottom * dy;
   }
 
 

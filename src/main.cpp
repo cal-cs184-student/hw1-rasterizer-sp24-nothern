@@ -15,6 +15,9 @@
 #include "transforms.h"
 #include "svgparser.h"
 
+#include <chrono>
+#include <fstream>
+
 using namespace std;
 using namespace CGL;
 
@@ -107,7 +110,7 @@ int main( int argc, char** argv ) {
     msg("Not enough arguments. Pass in an .svg or a directory of .svg files.");
     return 0;
   }
-
+  auto start = std::chrono::high_resolution_clock::now();
   vector<SVG*> svgs(loadPath(argv[1]));
   if (svgs.empty()) {
     msg("No svg files successfully loaded. Exiting.");
@@ -130,7 +133,20 @@ int main( int argc, char** argv ) {
 
   // set renderer
   viewer.set_renderer(&app);
+  auto end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> elapsed = end - start;
 
+  // write file
+  std::ofstream outFile{};
+  outFile.open("timing_results.txt", std::ios_base::app);
+
+  if (outFile.is_open()) {
+      outFile << "Elapsed time: " << elapsed.count() << " ms\n";
+      outFile.close(); // ¹Ø±ÕÎÄ¼þ
+  }
+  else {
+      std::cout << "Unable to open file";
+  }
   // init viewer
   viewer.init();
 
