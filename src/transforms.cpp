@@ -13,8 +13,6 @@ Vector2D operator*(const Matrix3x3 &m, const Vector2D &v) {
 
 Matrix3x3 translate(float dx, float dy) {
 	// Part 3: Fill this in.
-
-
 	return Matrix3x3(1, 0, dx, 0, 1, dy, 0, 0, 1);
 }
 
@@ -27,12 +25,11 @@ Matrix3x3 scale(float sx, float sy) {
 Matrix3x3 rotate(float deg) {
 	// Part 3: Fill this in.
 
-
 	float rad = deg * PI / 180; 
-	float cosTheta = cos(rad);
-	float sinTheta = sin(rad);
+	float cTheta = cos(rad);
+	float sTheta = sin(rad);
 
-	return Matrix3x3(cosTheta, -sinTheta, 0,sinTheta, cosTheta, 0, 0, 0, 1);
+	return Matrix3x3(cTheta, -sTheta, 0,sTheta, cTheta, 0, 0, 0, 1);
 }
 
 }

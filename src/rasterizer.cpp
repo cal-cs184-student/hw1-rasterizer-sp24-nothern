@@ -206,11 +206,11 @@ namespace CGL {
       }
 
       // find many white line inside the image. refer to ed81a, use floor and ceil to solve
-      float leftx = floor(min({ x0, x1, x2 }));
-      float lowy = floor(min({ y0, y1, y2 }));
+      float leftx = floor(min({x0, x1, x2}));
+      float lowy = floor(min({y0, y1, y2}));
 
-      float rightx = ceil(max({ x0, x1, x2 }));
-      float highy = ceil(max({ y0, y1, y2 }));
+      float rightx = ceil(max({x0, x1, x2}));
+      float highy = ceil(max({y0, y1, y2}));
       // ed
       double rate_div = sqrt(sample_rate);
       double area = abs((x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0));
@@ -274,11 +274,11 @@ namespace CGL {
       }
 
       // find many white line inside the image. refer to ed81a, use floor and ceil to solve
-      float leftx = floor(min({ x0, x1, x2 }));
-      float lowy = floor(min({ y0, y1, y2 }));
+      float leftx = floor(min({x0, x1, x2}));
+      float lowy = floor(min({y0, y1, y2}));
 
-      float rightx = ceil(max({ x0, x1, x2 }));
-      float highy = ceil(max({ y0, y1, y2 }));
+      float rightx = ceil(max({x0, x1, x2}));
+      float highy = ceil(max({y0, y1, y2}));
       // ed
       double rate_div = sqrt(sample_rate);
       double area = abs((x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0));
@@ -313,21 +313,20 @@ namespace CGL {
                           float v = w0 * v0 + w1 * v1 + w2 * v2;
 
                           // x+1,y
-                          float sample_x_plus_1 = temp_x + 1.0f + 0.5f; // +1.0f 表示x方向的相邻点
-                          float sample_y_same = temp_y + 0.5f; // y坐标不变
+                          float sample_x_plus_1 = temp_x + 1.0f + 0.5f; 
+                          float sample_y_same = temp_y + 0.5f; 
 
-                          // 计算重心坐标
                           float w0_x_plus_1 = ((y1 - y2) * (sample_x_plus_1 - rate_div * x2) + (x2 - x1) * (sample_y_same - rate_div * y2)) / area;
                           float w1_x_plus_1 = ((y2 - y0) * (sample_x_plus_1 - rate_div * x2) + (x0 - x2) * (sample_y_same - rate_div * y2)) / area;
                           float w2_x_plus_1 = 1 - w0_x_plus_1 - w1_x_plus_1;
 
-                          // 计算纹理坐标 u
+                          // u'
                           float u_x_plus_1 = w0_x_plus_1 * u0 + w1_x_plus_1 * u1 + w2_x_plus_1 * u2;
 
                           bool inside_x_plus_1 = w0_x_plus_1 >= 0 && w1_x_plus_1 >= 0 && w2_x_plus_1 >= 0;
-                          if (!inside_x_plus_1) { // 确保x-1不会越界
-                              sample_x_plus_1 = temp_x - 1.0f + 0.5f; // 尝试x-1
-                              // 重新计算 w0_x_plus_1, w1_x_plus_1, w2_x_plus_1
+                          if (!inside_x_plus_1) { 
+                              sample_x_plus_1 = temp_x - 1.0f + 0.5f; 
+                               // x-1
                               w0_x_plus_1 = ((y1 - y2) * (sample_x_plus_1 - rate_div * x2) + (x2 - x1) * (sample_y_same - rate_div * y2)) / area;
                               w1_x_plus_1 = ((y2 - y0) * (sample_x_plus_1 - rate_div * x2) + (x0 - x2) * (sample_y_same - rate_div * y2)) / area;
                               w2_x_plus_1 = 1 - w0_x_plus_1 - w1_x_plus_1;
@@ -335,40 +334,38 @@ namespace CGL {
                           }
 
                           // x,y+1
-                          float sample_x_same = temp_x + 0.5f; // x坐标不变
-                          float sample_y_plus_1 = temp_y + 1.0f + 0.5f; // +1.0f 表示y方向的相邻点
+                          float sample_x_same = temp_x + 0.5f;
+                          float sample_y_plus_1 = temp_y + 1.0f + 0.5f; 
 
-                          // 计算重心坐标
+
                           float w0_y_plus_1 = ((y1 - y2) * (sample_x_same - rate_div * x2) + (x2 - x1) * (sample_y_plus_1 - rate_div * y2)) / area;
                           float w1_y_plus_1 = ((y2 - y0) * (sample_x_same - rate_div * x2) + (x0 - x2) * (sample_y_plus_1 - rate_div * y2)) / area;
                           float w2_y_plus_1 = 1 - w0_y_plus_1 - w1_y_plus_1;
 
-                          // 计算纹理坐标 v
+                          // v'
                           float v_y_plus_1 = w0_y_plus_1 * v0 + w1_y_plus_1 * v1 + w2_y_plus_1 * v2;
 
                           bool inside_y_plus_1 = w0_y_plus_1 >= 0 && w1_y_plus_1 >= 0 && w2_y_plus_1 >= 0;
-                          if (!inside_y_plus_1) { // 确保y-1不会越界
-                              sample_y_plus_1 = temp_y - 1.0f + 0.5f; // 尝试y-1
-                              // 重新计算 w0_y_plus_1, w1_y_plus_1, w2_y_plus_1
+                          if(!inside_y_plus_1) { 
+                              sample_y_plus_1 = temp_y - 1.0f + 0.5f; 
+                              // y-1
                               w0_y_plus_1 = ((y1 - y2) * (sample_x_same - rate_div * x2) + (x2 - x1) * (sample_y_plus_1 - rate_div * y2)) / area;
                               w1_y_plus_1 = ((y2 - y0) * (sample_x_same - rate_div * x2) + (x0 - x2) * (sample_y_plus_1 - rate_div * y2)) / area;
                               w2_y_plus_1 = 1 - w0_y_plus_1 - w1_y_plus_1;
-                              v_y_plus_1 = w0_y_plus_1 * v0 + w1_y_plus_1 * v1 + w2_y_plus_1 * v2; // 更新v_y_plus_1
+                              v_y_plus_1 = w0_y_plus_1 * v0 + w1_y_plus_1 * v1 + w2_y_plus_1 * v2;
                           }
 
-                          float ddx_u = u_x_plus_1 - u; // u在x方向的变化量
-                          float ddy_v = v_y_plus_1 - v; // v在y方向的变化量
+                          float ddx_u = u_x_plus_1 - u; 
+                          float ddy_v = v_y_plus_1 - v; 
 
                           SampleParams sp;
                           sp.lsm = lsm;
                           sp.psm = psm;
 
-                          // 设置当前像素的纹理坐标
                           sp.p_uv = Vector2D(u, v);
 
-                          // 计算并设置纹理坐标在x方向和y方向的变化量
-                          sp.p_dx_uv = Vector2D(ddx_u, 0); // 只考虑u在x方向的变化，v的变化忽略
-                          sp.p_dy_uv = Vector2D(0, ddy_v); // 只考虑v在y方向的变化，u的变化忽略
+                          sp.p_dx_uv = Vector2D(ddx_u, 0); 
+                          sp.p_dy_uv = Vector2D(0, ddy_v); 
                           
 
                           
